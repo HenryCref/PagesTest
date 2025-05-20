@@ -1,0 +1,160 @@
+<html>
+<head>
+<title>research</title>
+<style>
+button {
+	width:100%;
+	text-align:left;
+	height:30px;
+	background:none;
+	border: none;
+	cursor: pointer;
+	background-image: linear-gradient(rgb(0 0 0/4%) 0 0);
+	margin-bottom: 6px;
+}
+button:hover {
+	background-image: linear-gradient(rgb(0 0 0/40%) 0 0);
+}
+.RButton {
+	width: 40%;
+	text-align: center;
+}
+.SButton {
+	width: 60%;
+}
+#save {
+	margin: 0px;
+}
+#fullscreen {
+	margin: 0px;
+}
+#url {
+	width: 100%;
+	height:30px;
+	margin-bottom: 6px;
+}
+#Bottom {
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	margin: 10px;
+	width: calc(100% - 20px);
+}
+#unfullscreen {
+	visibility: hidden;
+	position: absolute;
+	width: fitted;
+	text-align: center;
+	font-size: 12px;
+	height: 14px;
+}
+</style>
+</head>
+<body>
+<div class="ref" id="0"></div>
+<div id="sidebar" style="width: 20%; box-sizing: border-box; overflow-x: hidden; overflow-y: scroll; background-color: DarkSeaGreen; bottom: 0px; position: fixed; padding: 10px; top: 0px; left: 0px;">
+	<center>
+	<div id="Bottom">
+		<button id="save" onclick="download(document.documentElement.outerHTML, 'AlphaV1.1.html', 'text/html')">Save File</button>
+		<button id='fullscreen' onclick="fullscreen()">Fullscreen</button>
+	</div>
+	<input type="text" id="url" placeholder="enter URL here"></input>
+	<button onclick="search()" >Search</button>
+	<button onclick="saveNewWebsite(document.getElementById('url').value)">Save</button>
+	<div id="buttons"></div>
+</div>
+<div id="box" style="box-sizing: border-box; position: fixed; left: 20%; top: 0px; bottom: 0px; right: 0px;">
+	<button id="unfullscreen" onclick="unfullscreen()">Unfullscreen</button>
+	<iframe id="iframe" src="" width="100%" height="100%"></iframe>
+</div>
+<script>
+const sidebar = document.getElementById('sidebar')
+const box = document.getElementById('box')
+const ref = document.getElementsByClassName('ref')[0]
+const container = document.getElementById("buttons");
+const Ubutton = document.getElementById("unfullscreen")
+if (!("sites" in localStorage)) {
+  localStorage.setItem("sites","[]")
+}
+document.getElementById("url").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        document.getElementById('iframe').src = e.target.value;
+    }
+});
+function fullscreen () {
+	sidebar.style.width = "0%";
+	sidebar.style.padding = "0px";
+	box.style.left = "0px";
+	Ubutton.style.visibility = "visible"
+}
+function unfullscreen() {
+	sidebar.style.width = "20%";
+	sidebar.style.padding = "10px";
+	box.style.left = "20%";
+	Ubutton.style.visibility = "hidden"
+}
+function search(){
+  let Input = document.getElementById('url').value;
+  document.getElementById('iframe').src = Input;
+}
+function openPage(elem){
+  document.getElementById('iframe').src = elem.id;
+}
+function saveNewWebsite(url){
+  let prev = JSON.parse(localStorage.getItem("sites"));
+  let name = prompt("name it");
+  prev = [...prev, [url, name]];
+  localStorage.setItem("sites",JSON.stringify(prev));
+  genButton([url, name])
+}
+function genButton(item) {
+    const button = document.createElement('button');
+    button.textContent = item[1];
+    button.setAttribute("onclick","openPage(this)");
+    button.setAttribute("id",item[0]);
+    button.setAttribute("class",ref.id + " SButton");
+    const Rbutton = document.createElement('button');
+    Rbutton.textContent = "remove";
+    Rbutton.setAttribute("class",ref.id + " Rbutton");
+    Rbutton.setAttribute("onclick","removeC(this)");
+    let newNum = parseInt(ref.id) + 1;
+    ref.setAttribute("id", newNum.toString());
+    container.appendChild(button);
+    container.appendChild(Rbutton);
+}
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    var a = document.createElement("a"),
+    url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);  
+    }, 0); 
+}
+function removeC(elem) {
+  let c = elem.className;
+  let objs = document.getElementsByClassName(parseInt(c));
+  let button = objs[0];
+  let prev = JSON.parse(localStorage.getItem("sites"));
+  let ind = findArrayIndex(prev, button.innerHTML);
+  prev.splice(ind,1);
+  localStorage.setItem("sites",JSON.stringify(prev));
+  objs[0].remove();
+  objs[0].remove();
+}
+function findArrayIndex(arr, target) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][1] == target) {
+        return i;
+    }
+  }
+  return null;
+}
+JSON.parse(localStorage.getItem("sites")).forEach(genButton)
+</script>
+</body>
+</html>
